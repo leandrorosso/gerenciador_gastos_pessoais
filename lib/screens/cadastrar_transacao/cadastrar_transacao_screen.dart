@@ -20,7 +20,7 @@ class _CadastrarTransacaoScreenState extends State<CadastrarTransacaoScreen> {
   final _descricaoController = TextEditingController();
   final _valorController = TextEditingController();
   final _dataController = TextEditingController();
-  late Conta _contaSelecionada;
+  Conta? _contaSelecionada = null;
   ContaService cs = ContaService();
   late Future<List> _loadContas;
   late List<Conta> _contas;
@@ -97,11 +97,11 @@ class _CadastrarTransacaoScreenState extends State<CadastrarTransacaoScreen> {
                         }).toList(),
                       ),
                       Padding(
-                        padding: EdgeInsets.only(top: 20, bottom: 20),
+                        padding: const EdgeInsets.only(top: 20, bottom: 20),
                         child: Container(
                           height: 40,
                           width: double.infinity,
-                          child: RaisedButton(
+                          child: ElevatedButton(
                             onPressed: () {
                               Transacao newTransacao = Transacao(
                                   titulo: _tituloController.text,
@@ -109,15 +109,18 @@ class _CadastrarTransacaoScreenState extends State<CadastrarTransacaoScreen> {
                                   tipo: widget.tipoTransacao,
                                   valor: double.parse(_valorController.text),
                                   data: selectedDate.toString(),
-                                  conta: _contaSelecionada.id);
+                                  conta: _contaSelecionada!.id);
                               ts.addTransacao(newTransacao);
                               Navigator.of(context).push(MaterialPageRoute(
                                   builder: (_) => HomeScreen()));
                             },
-                            color: widget.tipoTransacao == 1
-                                ? Colors.green
-                                : Colors.red,
-                            child: Text(
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                  widget.tipoTransacao == 1
+                                      ? Colors.green
+                                      : Colors.red),
+                            ),
+                            child: const Text(
                               "Cadastrar",
                               style:
                                   TextStyle(color: Colors.white, fontSize: 16),
@@ -131,7 +134,7 @@ class _CadastrarTransacaoScreenState extends State<CadastrarTransacaoScreen> {
               ),
             );
           } else {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(),
             );
           }

@@ -9,7 +9,7 @@ Widget cardTransacao(BuildContext context, int index, Transacao transacao) {
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(8),
       boxShadow: [
-        BoxShadow(
+        const BoxShadow(
             color: Color(0x0400000),
             blurRadius: 10,
             spreadRadius: 10,
