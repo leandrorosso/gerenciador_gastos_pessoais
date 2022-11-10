@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:gerenciador_gastos_pessoais/models/conta.dart';
 import 'package:gerenciador_gastos_pessoais/screens/home/home_screen.dart';
 import 'package:gerenciador_gastos_pessoais/services/conta_service.dart';
+import '../../services/conta_rest_service.dart';
 
 class CadastrarContaScreen extends StatelessWidget {
   final _tituloController = TextEditingController();
   final _saldoController = TextEditingController();
   ContaService cs = ContaService();
+  ContaRestService crs = ContaRestService();
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,11 +29,23 @@ class CadastrarContaScreen extends StatelessWidget {
                   controller: _tituloController,
                   keyboardType: TextInputType.text,
                   decoration: InputDecoration(labelText: "Título"),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Preencha o Título corretamente";
+                    }
+                    return null;
+                  },
                 ),
                 TextFormField(
                   controller: _saldoController,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(labelText: "Saldo"),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Preencha o Saldo corretamente";
+                    }
+                    return null;
+                  },
                 ),
                 Padding(
                   padding: EdgeInsets.only(top: 20, bottom: 20),
@@ -38,13 +54,18 @@ class CadastrarContaScreen extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        Conta newConta = Conta(
-                            titulo: _tituloController.text,
-                            saldo: double.parse(_saldoController.text));
-                        cs.addConta(newConta);
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => HomeScreen(),
-                        ));
+                        if (_formKey.currentState!.validate()) {
+                          Conta newConta = Conta(
+                              titulo: _tituloController.text,
+                              saldo: double.parse(_saldoController.text));
+                          // cs.addConta(newConta);
+                          crs.addConta(newConta);
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => HomeScreen(),
+                            ),
+                          );
+                        }
                       },
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(Colors.blue),

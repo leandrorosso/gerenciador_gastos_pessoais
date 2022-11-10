@@ -12,6 +12,27 @@ class Transacao {
       this.data,
       this.valor});
 
+  Map<String, dynamic> toJson() {
+    return {
+      'titulo': titulo,
+      'descricao': descricao,
+      'valor': valor,
+      'data': data,
+      'tipo': tipo,
+      'conta_id': conta
+    };
+  }
+
+  Transacao.fromJson(Map map) {
+    id = map["id"];
+    titulo = map["titulo"];
+    descricao = map["descricao"];
+    valor = map["valor"];
+    data = map["data"];
+    tipo = map["tipo"];
+    conta = map["conta_id"];
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
