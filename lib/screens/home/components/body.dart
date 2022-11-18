@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:gerenciador_gastos_pessoais/screens/components/card_conta.dart';
 import 'package:gerenciador_gastos_pessoais/screens/components/card_transacao.dart';
 import 'package:gerenciador_gastos_pessoais/screens/transacao/transacao_screen.dart';
+import 'package:gerenciador_gastos_pessoais/services/conta_rest_service.dart';
 import 'package:gerenciador_gastos_pessoais/services/conta_service.dart';
+import 'package:gerenciador_gastos_pessoais/services/transacao_rest_service.dart';
 import 'package:gerenciador_gastos_pessoais/services/transacao_service.dart';
 
 class Body extends StatefulWidget {
@@ -13,6 +15,8 @@ class Body extends StatefulWidget {
 class _BodyState extends State<Body> {
   ContaService cs = ContaService();
   TransacaoService ts = TransacaoService();
+  ContaRestService crs = ContaRestService();
+  TransacaoRestService trs = TransacaoRestService();
   late Future<List> _loadContas;
   late Future<List> _loadTransacoes;
   late List _contas;
@@ -21,8 +25,7 @@ class _BodyState extends State<Body> {
   @override
   void initState() {
     // TODO: implement initState
-    _loadContas = _getContas();
-    _loadTransacoes = _getTransacoes();
+    _refresh();
     super.initState();
   }
 
@@ -112,11 +115,18 @@ class _BodyState extends State<Body> {
     );
   }
 
+  Future<Null> _refresh() async {
+    setState(() {
+      _loadTransacoes = _getTransacoes();
+      _loadContas = _getContas();
+    });
+  }
+
   Future<List> _getContas() async {
-    return await cs.getAllContas();
+    return await crs.getContas();
   }
 
   Future<List> _getTransacoes() async {
-    return await ts.getAllTransacoes();
+    return await trs.getTransacoes();
   }
 }

@@ -8,25 +8,26 @@ import 'package:gerenciador_gastos_pessoais/services/conta_service.dart';
 import 'package:gerenciador_gastos_pessoais/services/transacao_rest_service.dart';
 import 'package:gerenciador_gastos_pessoais/services/transacao_service.dart';
 
-class CadastrarTransacaoScreen extends StatefulWidget {
-  final int? tipoTransacao;
+class EditarTransacaoScreen extends StatefulWidget {
+  final String? idTransacao;
 
-  CadastrarTransacaoScreen({this.tipoTransacao});
+  EditarTransacaoScreen({this.idTransacao});
   @override
-  _CadastrarTransacaoScreenState createState() =>
-      _CadastrarTransacaoScreenState();
+  _EditarTransacaoScreenState createState() => _EditarTransacaoScreenState();
 }
 
-class _CadastrarTransacaoScreenState extends State<CadastrarTransacaoScreen> {
+class _EditarTransacaoScreenState extends State<EditarTransacaoScreen> {
   final _tituloController = TextEditingController();
   final _descricaoController = TextEditingController();
   final _valorController = TextEditingController();
   final _dataController = TextEditingController();
-  Conta? _contaSelecionada = null;
+  Conta? _contaSelecionada;
+  Transacao? _transacao;
   ContaService cs = ContaService();
   ContaRestService crs = ContaRestService();
-  late Future<List> _loadContas;
-  late List<Conta> _contas;
+  Future<List>? _loadContas;
+  Future<Transacao>? _loadTransacao;
+  List<Conta>? _contas;
   DateTime selectedDate = DateTime.now();
   TransacaoService ts = TransacaoService();
   TransacaoRestService trs = TransacaoRestService();
@@ -34,6 +35,7 @@ class _CadastrarTransacaoScreenState extends State<CadastrarTransacaoScreen> {
   @override
   void initState() {
     // TODO: implement initState
+    _loadTransacao = _getTransacao(widget.idTransacao!);
     _loadContas = _getContas();
     super.initState();
   }
@@ -42,16 +44,17 @@ class _CadastrarTransacaoScreenState extends State<CadastrarTransacaoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.tipoTransacao == 1
-            ? "Cadastro de entrada"
-            : "Cadastro de saída"),
-        backgroundColor: widget.tipoTransacao == 1 ? Colors.green : Colors.red,
+        title: Text("Editar transação"),
       ),
       body: FutureBuilder(
-        future: _loadContas,
+        future: _loadTransacao,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
-            _contas = snapshot.data;
+            _transacao = snapshot.data;
+            _tituloController.text = _transacao!.titulo.toString();
+            _descricaoController.text = _transacao!.descricao.toString();
+            _valorController.text = _transacao!.valor.toString();
+            _dataController.text = _transacao!.data.toString();
             return SingleChildScrollView(
               child: Padding(
                 padding: EdgeInsets.all(10),
@@ -86,22 +89,38 @@ class _CadastrarTransacaoScreenState extends State<CadastrarTransacaoScreen> {
                           ),
                         ),
                       ),
-                      DropdownButtonFormField(
-                        value: _contaSelecionada,
-                        onChanged: (Conta? conta) {
-                          setState(() {
-                            _contaSelecionada = conta!;
-                          });
+                      FutureBuilder(
+                        future: _loadContas,
+                        builder:
+                            (BuildContext context, AsyncSnapshot snapshot) {
+                          if (snapshot.hasData) {
+                            _contas = snapshot.data;
+                            var indice = _contas!.indexWhere(
+                                (conta) => conta.id == _transacao!.conta);
+                            _contaSelecionada = _contas![indice];
+                            return DropdownButtonFormField(
+                              value: _contaSelecionada,
+                              onChanged: (Conta? conta) {
+                                setState(() {
+                                  _contaSelecionada = conta;
+                                });
+                              },
+                              items: _contas!.map((conta) {
+                                return DropdownMenuItem<Conta>(
+                                  value: conta,
+                                  child: Text(conta.titulo!),
+                                );
+                              }).toList(),
+                            );
+                          } else {
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
                         },
-                        items: _contas.map((conta) {
-                          return DropdownMenuItem<Conta>(
-                            value: conta,
-                            child: Text(conta.titulo!),
-                          );
-                        }).toList(),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(top: 20, bottom: 20),
+                        padding: EdgeInsets.only(top: 20, bottom: 20),
                         child: Container(
                           height: 40,
                           width: double.infinity,
@@ -110,22 +129,20 @@ class _CadastrarTransacaoScreenState extends State<CadastrarTransacaoScreen> {
                               Transacao newTransacao = Transacao(
                                   titulo: _tituloController.text,
                                   descricao: _descricaoController.text,
-                                  tipo: widget.tipoTransacao,
+                                  tipo: _transacao!.tipo,
                                   valor: double.parse(_valorController.text),
-                                  data: selectedDate.toString(),
+                                  data: formatDate(selectedDate,
+                                      [yyyy, '-', mm, '-', dd]).toString(),
                                   conta: _contaSelecionada!.id);
-                              trs.addTransacao(newTransacao);
+                              trs.editTransacao(
+                                  newTransacao, _transacao!.id.toString());
                               Navigator.of(context).push(MaterialPageRoute(
                                   builder: (_) => HomeScreen()));
                             },
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(
-                                  widget.tipoTransacao == 1
-                                      ? Colors.green
-                                      : Colors.red),
-                            ),
-                            child: const Text(
-                              "Cadastrar",
+                            style: ElevatedButton.styleFrom(
+                                primary: Colors.blueAccent),
+                            child: Text(
+                              "Editar",
                               style:
                                   TextStyle(color: Colors.white, fontSize: 16),
                             ),
@@ -138,7 +155,7 @@ class _CadastrarTransacaoScreenState extends State<CadastrarTransacaoScreen> {
               ),
             );
           } else {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(),
             );
           }
@@ -162,5 +179,9 @@ class _CadastrarTransacaoScreenState extends State<CadastrarTransacaoScreen> {
 
   Future<List> _getContas() async {
     return await crs.getContas();
+  }
+
+  Future<Transacao> _getTransacao(String id) async {
+    return await trs.getTransacaoId(id);
   }
 }

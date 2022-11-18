@@ -6,11 +6,11 @@ import 'package:http/http.dart';
 
 class TransacaoRestService {
   Future<void> addTransacao(Transacao transacao) async {
-    final response = await RestUtil.addData('transacoes', transacao.toJson());
+    final response = await RestUtil.addData('transacaos', transacao.toJson());
   }
 
   Future<List<Transacao>> getTransacoes() async {
-    final response = await RestUtil.getData('transacoes');
+    final response = await RestUtil.getData('transacaos');
     if (response.statusCode == 200) {
       List<dynamic> conteudo = jsonDecode(response.body);
       List<Transacao> transacoes = conteudo
@@ -23,7 +23,7 @@ class TransacaoRestService {
   }
 
   Future<Transacao> getTransacaoId(String id) async {
-    final response = await RestUtil.getDataId('transacoes', id);
+    final response = await RestUtil.getDataId('transacaos', id);
     if (response.statusCode == 200) {
       return Transacao.fromJson(json.decode(response.body));
     } else {
@@ -40,7 +40,7 @@ class TransacaoRestService {
       'conta_id': transacao.conta,
       'tipo': transacao.tipo == "TipoEnum.entrada" ? "1" : "2"
     };
-    final response = await RestUtil.editData('transacoes', novaTransacao, id);
+    final response = await RestUtil.editData('transacaos', novaTransacao, id);
     if (response.statusCode == 200) {
       print("transacao editada");
     } else {
@@ -49,7 +49,7 @@ class TransacaoRestService {
   }
 
   Future<void> removeTransacao(String id) async {
-    final response = await RestUtil.removeDataId('transacoes', id);
+    final response = await RestUtil.removeDataId('transacaos', id);
     if (response.statusCode == 204) {
       print("Transacao removida com sucesso");
     } else {

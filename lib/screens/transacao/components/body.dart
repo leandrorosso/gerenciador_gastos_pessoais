@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gerenciador_gastos_pessoais/models/transacao.dart';
 import 'package:gerenciador_gastos_pessoais/screens/components/card_transacao.dart';
+import 'package:gerenciador_gastos_pessoais/services/transacao_rest_service.dart';
 import 'package:gerenciador_gastos_pessoais/services/transacao_service.dart';
 
 class Body extends StatefulWidget {
@@ -10,6 +11,7 @@ class Body extends StatefulWidget {
 
 class _BodyState extends State<Body> {
   TransacaoService ts = TransacaoService();
+  TransacaoRestService trs = TransacaoRestService();
   late Future<List> _loadTransacoes;
   late List<Transacao> _transacoes;
 
@@ -66,6 +68,6 @@ class _BodyState extends State<Body> {
   }
 
   Future<List> _getTransacoes() async {
-    return await ts.getAllTransacoes();
+    return await trs.getTransacoes();
   }
 }

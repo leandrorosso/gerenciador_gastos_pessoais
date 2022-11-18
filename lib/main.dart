@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gerenciador_gastos_pessoais/screens/cadastrar_conta/cadastrar_conta_screen.dart';
 import 'package:gerenciador_gastos_pessoais/screens/home/home_screen.dart';
 
 void main() => runApp(const Main());
